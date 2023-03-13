@@ -32,11 +32,23 @@ public class CurlTest {
             }
             System.out.println(builder.toString());
 
+
+
+
+
+
+
         } catch (IOException e) {
             System.out.print("error");
             e.printStackTrace();
         }
     }
+
+
+
+
+
+
 
     @Test
     public void test1() throws IOException {
