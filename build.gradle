@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.4'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+// 设置当前项目下的所有子项目
+subprojects {
+}
+
+allprojects { // 设置所有项目仓库包括当前项目
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories {
+        maven { url "https://maven.aliyun.com/repository/public" }
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'org.springframework.boot:spring-boot-starter-test'
+
+        implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.3.1'
+        implementation 'mysql:mysql-connector-java:8.0.30'
+        implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
+        implementation 'com.google.guava:guava:31.1-jre'
+        implementation 'com.squareup.okhttp3:okhttp:4.6.0'
+
+        compileOnly 'org.projectlombok:lombok:1.18.24'
+        annotationProcessor 'org.projectlombok:lombok:1.18.24'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    }
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
