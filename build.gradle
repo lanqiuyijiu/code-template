@@ -30,10 +30,12 @@ allprojects { // 设置所有项目仓库包括当前项目
         implementation 'com.google.guava:guava:31.1-jre'
         implementation 'com.squareup.okhttp3:okhttp:4.6.0'
 
+        implementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+        implementation 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+
         compileOnly 'org.projectlombok:lombok:1.18.24'
         annotationProcessor 'org.projectlombok:lombok:1.18.24'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+
     }
 }
 
