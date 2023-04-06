@@ -1,68 +1,53 @@
 package com.jdk.net.http;
 
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.junit.jupiter.api.Test;
 
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
  * @author ck created in 2021/9/13 14:00
  */
+@Slf4j
 public class HttpUtil {
+
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .sslSocketFactory(SSLSocketClient.getSSLSocketFactory(), SSLSocketClient.getX509TrustManager())
+            .hostnameVerifier(SSLSocketClient.getHostnameVerifier())
+            .callTimeout(Duration.ofSeconds(30)).build();// 设置总超时时间30秒
+
     public static String doGet(String url) {
-        OkHttpClient client = new OkHttpClient.Builder()
-                // 忽略掉https 证书的校验
-                .sslSocketFactory(SSLSocketClient.getSSLSocketFactory(), new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-
-                    }
-
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                })
-                .hostnameVerifier(SSLSocketClient.getHostnameVerifier())
-                // 设置超时时间
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .build();
-
-
-        Request request = new Request.Builder().get().url(url)
-                .header("User-Agent", "Mozilla/5.0" +
-                                      " (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
-                .build();
-        String httpCode;
+        Request request = new Request.Builder().get().url(url).build();
+        String result;
         try (Response response = client.newCall(request).execute()) {
-            httpCode = String.valueOf(response.code());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return e.getMessage();
+            result = String.valueOf(response.code());
+        } catch (Exception e) {
+            log.error("okhttp 请求 {} 异常  url {} ", url, e.getMessage());
+            if (CurlTest.doGet(url).equals("200")) {
+                result = "200";
+            } else {
+                result = e.getMessage();
+            }
         }
-        return httpCode;
+        return result;
     }
 
-
-    @Test
-    public void testDoGet() {
-//        String s = doGet("https://115.239.190.131").replaceAll("\n", "");
-//        System.out.println(doGet("https://dd.yytlms.com/agapp/jobTask/allJobtask"));
-        System.out.println(doGet("https://ke.qq.com/webcourse/398381/100475149#taid=4067273900168237&vid=5285890806011077757"));
-
-//        System.out.println(5%4);
+    public static String doPost(String url, String jsonContent) {
+        RequestBody body = RequestBody.create(jsonContent, MediaType.get("application/json"));
+        Request request = new Request.Builder().url(url).post(body).build();
+        String result = "";
+        try (Response response = client.newCall(request).execute()) {
+            if (response.body() != null) {
+                result = response.body().string();
+            }
+        } catch (IOException e) {
+            result = e.getMessage().replaceAll("\n", "");
+        }
+        return result;
     }
 }

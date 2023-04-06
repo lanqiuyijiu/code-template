@@ -1,63 +1,39 @@
 package com.jdk.net.http;
 
-import org.junit.jupiter.api.Test;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * @author zck created in 2022/12/1 16:25:22
+ * @author zck created in 2023/3/3 11:00
  */
+@Slf4j
 public class CurlTest {
+    private static ProcessBuilder processBuilder;
 
-    @Test
-    public void execCurl() {
-        ProcessBuilder process = new ProcessBuilder(
-                "curl", "-X", "GET",
-//                "-sIL -w",
-                "https://dd.yytlms.com/agapp/jobTask/allJobtask",
-                "-H", "accept: */*", "-H", "Content-Type: application/json;charset=UTF-8",
-                "{ \\\"bodyName\\\": \\\"bodyValue\\\"}");
-        Process p;
-
-        try {
-            p = process.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-                builder.append(System.getProperty("line.separator"));
-            }
-            System.out.println(builder.toString());
-
-
-
-
-
-
-
-        } catch (IOException e) {
-            System.out.print("error");
-            e.printStackTrace();
+    private static ProcessBuilder instance(String url) {
+        if (processBuilder == null) {
+            processBuilder = new ProcessBuilder("curl",
+                    "--max-time", "5", "-o", "/dev/null", "-s", "-w", "%{http_code}", url);
         }
+        return processBuilder;
     }
 
-
-
-
-
-
-
-    @Test
-    public void test1() throws IOException {
-        String url = "https://dd.yytlms.com/agapp/jobTask/allJobtask";
-        ProcessBuilder pb = new ProcessBuilder("curl", "-k", "-I", "-s", "-o", "/dev/null", "-w", "%{http_code}", url);
-
-        Process p = pb.start();
-        String s = new BufferedReader(new InputStreamReader(p.getInputStream())).readLine();
-        System.out.println(s);
+    public static String doGet(String url) {
+        Process process;
+        String result;
+        try {
+            process = instance(url).start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            result = reader.readLine();
+            log.info("curl request");
+        } catch (IOException e) {
+            log.error("curl 请求 {} 异常  {}", url, e.getMessage());
+            throw new RuntimeException(e);
+        }
+        log.info(result);
+        return result;
     }
-
 }
