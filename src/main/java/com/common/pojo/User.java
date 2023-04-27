@@ -1,12 +1,15 @@
 package com.common.pojo;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**
  * @author zck created in 2023/3/13 15:57
  */
-@Data
+@Getter
+@Setter
 public class User {
     private Long regionId;
     private String regionName;
