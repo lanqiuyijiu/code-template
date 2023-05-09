@@ -28,11 +28,12 @@ public class HttpUtil {
             result = String.valueOf(response.code());
         } catch (Exception e) {
             log.error("okhttp 请求 {} 异常  url {} ", url, e.getMessage());
-            if (CurlTest.doGet(url).equals("200")) {
-                result = "200";
-            } else {
-                result = e.getMessage();
-            }
+            result = e.getMessage();
+//            if (CurlTest.doGet(url).equals("200")) {
+//                result = "200";
+//            } else {
+//                result = e.getMessage();
+//            }
         }
         return result;
     }
