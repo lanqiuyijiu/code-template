@@ -3,6 +3,7 @@ package com.jdk.file;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -150,5 +151,47 @@ public class TestFile {
         String filePath = "/Users/zck/Develop/projectFileTemp/1/1/1/1/1/2.txt";
         createDirectories(filePath);
         System.out.println("文件夹已创建");
+    }
+
+    @Test
+    public void test_demo_2023_06_08_17_01_44() {
+        String filePath = "/Users/zck/Desktop/1441a7909c087dbbe7ce59881b9df8b9.xlsx";
+        String extension = "";
+        int indexOfLastExtension = filePath.lastIndexOf(".");
+        // 检查windows, linux 最后一个文件分隔符
+        int lastSeparatorPosWindows = filePath.lastIndexOf("\\");
+        int lastSeparatorPosUnix = filePath.lastIndexOf("/");
+        // 最后文件分隔符位置， 取最大值
+        int indexOfLastSeparator = Math.max(lastSeparatorPosWindows, lastSeparatorPosUnix);
+        // 确保.分隔符在文件分隔符之后.
+        if (indexOfLastExtension > indexOfLastSeparator) {
+            extension = filePath.substring(indexOfLastExtension);
+        }
+        System.out.println(extension);
+    }
+
+    @Test
+    public void test_demo_2023_06_08_22_09_12() {
+        System.out.println(md5HashCode("/Users/zck/Movies/2021年图灵学院 - JAVA高级架构师 (第4期)/视频/15-6 ElasticSearch安装使用教程（2）-.mp4"));
+    }
+
+    public static String md5HashCode(String filePath) {
+        try {
+            InputStream fis = new FileInputStream(filePath);
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] buffer = new byte[1024];
+            int length = -1;
+            while ((length = fis.read(buffer, 0, 1024)) != -1) {
+                md.update(buffer, 0, length);
+            }
+            fis.close();
+            //转换并返回包含16个元素字节数组,返回数值范围为-128到127
+            byte[] md5Bytes = md.digest();
+            BigInteger bigInt = new BigInteger(1, md5Bytes);
+            return bigInt.toString(16);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }
