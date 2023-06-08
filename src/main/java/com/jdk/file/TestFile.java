@@ -61,99 +61,6 @@ public class TestFile {
 
 
     @Test
-    public void test_demo_2023_06_04_16_36_21() {
-//        File[] files = new File("/Users/zck/Develop/projectFileTemp/c790fcc3d866e2bd43df4f8ece9af5a5").listFiles();
-//        calculateHash(List.of(files))
-//                .thenAccept(md5 -> System.out.println("文件的MD5值: " + md5))
-//                .exceptionally(e -> {
-//                    System.out.println("无法计算文件的MD5值: " + e.getMessage());
-//                    return null;
-//                });
-        File file = new File("/Users/zck/Develop/projectFile/2023-06-04/2023-06-04-17/2e2c2329c7cdfa878ae0f4c175bf38ad.mp4");
-        List<File> fileChunkList = splitFile(file);
-
-        calculateHash(fileChunkList)
-                .thenAccept(md5 -> System.out.println("文件的MD5值: " + md5))
-                .exceptionally(e -> {
-                    System.out.println("无法计算文件的MD5值: " + e.getMessage());
-                    return null;
-                });
-    }
-
-    private static List<File> splitFile(File file) {
-        long fileSize = file.length();
-        int offset = 2 * 1024 * 1024; // 偏移量
-
-        List<File> chunks = new ArrayList<>();
-        long cur = 0;
-        while (cur < fileSize) {
-            if (cur + offset >= fileSize) {
-                chunks.add(file);
-            } else {
-                long mid = cur + offset / 2;
-                long end = cur + offset;
-                chunks.add(sliceFile(file, cur, cur + 2));
-                chunks.add(sliceFile(file, mid, mid + 2));
-                chunks.add(sliceFile(file, end - 2, end));
-            }
-            cur += offset;
-        }
-        return chunks;
-    }
-
-    private static File sliceFile(File file, long start, long end) {
-        try {
-            byte[] buffer = new byte[(int) (end - start)];
-            try (FileInputStream inputStream = new FileInputStream(file)) {
-                inputStream.skip(start);
-                inputStream.readNBytes(buffer, 0, buffer.length);
-            }
-            File tempFile = File.createTempFile(null, null);
-            Files.write(tempFile.toPath(), buffer);
-            return tempFile;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private static CompletableFuture<String> calculateHash(List<File> fileChunkList) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-                for (File chunk : fileChunkList) {
-                    byte[] chunkBytes = Files.readAllBytes(chunk.toPath());
-                    md5Digest.update(chunkBytes);
-                }
-                byte[] hashBytes = md5Digest.digest();
-                StringBuilder md5Builder = new StringBuilder();
-                for (byte b : hashBytes) {
-                    md5Builder.append(String.format("%02x", b));
-                }
-                return md5Builder.toString();
-            } catch (NoSuchAlgorithmException | IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException("无法计算MD5值");
-            }
-        });
-    }
-
-    public static void createDirectories(String filePath) {
-        File file = new File(filePath);
-        File parentDir = file.getParentFile();
-        if (parentDir != null) {
-            parentDir.mkdirs();
-        }
-    }
-
-    @Test
-    public void test_demo_2023_06_04_17_00_36() {
-        String filePath = "/Users/zck/Develop/projectFileTemp/1/1/1/1/1/2.txt";
-        createDirectories(filePath);
-        System.out.println("文件夹已创建");
-    }
-
-    @Test
     public void test_demo_2023_06_08_17_01_44() {
         String filePath = "/Users/zck/Desktop/1441a7909c087dbbe7ce59881b9df8b9.xlsx";
         String extension = "";
@@ -175,23 +82,69 @@ public class TestFile {
         System.out.println(md5HashCode("/Users/zck/Movies/2021年图灵学院 - JAVA高级架构师 (第4期)/视频/15-6 ElasticSearch安装使用教程（2）-.mp4"));
     }
 
+    @Test
+    public void test_demo_2023_06_08_23_23_45() throws NoSuchAlgorithmException {
+        File[] files = new File("/Users/zck/Develop/project-trace/test/projectFileTemp/1d15f94dfcf17580a36e318cf1d72ea2").listFiles();
+        // 将文件列表有序处理
+        HashMap<Integer, File> map = new HashMap<>();
+        for (File file : files) {
+            if (file.isFile() && !file.isHidden()) {
+                map.put(Integer.valueOf(file.getName()), file);
+            }
+        }
+        String path = "/Users/zck/Develop/project-trace/111.mp4";
+        FileUtils.createFile(path);
+        FileOutputStream fos;
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        try {
+            fos = new FileOutputStream(path);
+            for (int i = 0; i < map.size(); i++) {
+                File file = map.get(i);
+                FileInputStream fis = new FileInputStream(file);
+                // 创建一个缓冲区
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                // 逐个读取分片文件，并写入合并文件
+                while ((bytesRead = fis.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                    md.update(buffer, 0, bytesRead);
+                }
+                // 关闭当前分片文件的输入流
+                fis.close();
+                //转换并返回包含16个元素字节数组,返回数值范围为-128到127
+            }
+            fos.close();
+            byte[] byteArray = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : byteArray) {
+                sb.append(String.format("%02x", b));
+            }
+            System.out.println(sb);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static String md5HashCode(String filePath) {
         try {
-            InputStream fis = new FileInputStream(filePath);
-            MessageDigest md = MessageDigest.getInstance("MD5");
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            FileInputStream fis = new FileInputStream("path");
             byte[] buffer = new byte[1024];
-            int length = -1;
-            while ((length = fis.read(buffer, 0, 1024)) != -1) {
-                md.update(buffer, 0, length);
+            int len;
+            while ((len = fis.read(buffer)) != -1) {
+                md5.update(buffer, 0, len);
             }
             fis.close();
-            //转换并返回包含16个元素字节数组,返回数值范围为-128到127
-            byte[] md5Bytes = md.digest();
-            BigInteger bigInt = new BigInteger(1, md5Bytes);
-            return bigInt.toString(16);
-        } catch (Exception e) {
+
+            byte[] byteArray = md5.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : byteArray) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
-            return "";
         }
+        return null;
     }
 }
