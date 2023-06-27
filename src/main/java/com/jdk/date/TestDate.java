@@ -7,9 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.WeekFields;
+import java.util.*;
 
 /**
  * @author zck created in 2023/3/13 16:14
@@ -19,7 +19,6 @@ public class TestDate {
     public void test_demo_2023_14_13_16_14_43() {
         System.out.println(LocalTime.now().getSecond());
     }
-
 
 
     @Test
@@ -49,6 +48,7 @@ public class TestDate {
 
     /**
      * 获取当前日期是一年中第几周
+     *
      * @param date
      * @return
      */
@@ -62,10 +62,19 @@ public class TestDate {
     }
 
 
-
+    /**
+     * 获取当前时间是当年的第几周
+     */
     @Test
-    public void test_demo_2023_04_27_15_36_36() {
-
+    public void test_demo_2023_06_25_09_56_07() {
+        // 获取当前日期
+        LocalDate currentDate = LocalDate.now();
+        // 获取一周的起始日期
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        // 计算当前时间是当年的第几周
+        int weekNumber = currentDate.get(weekFields.weekOfWeekBasedYear());
+        // 输出结果
+        System.out.println("当前时间是当年的第 " + weekNumber + " 周");
     }
 
 }
